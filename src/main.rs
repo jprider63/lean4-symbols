@@ -1,13 +1,12 @@
 use bimap::BiMap;
 use dioxus::prelude::*;
+use dioxus_free_icons::icons::fa_brands_icons::*;
+use dioxus_free_icons::Icon;
 use tracing;
 
-const FAVICON: Asset = asset!("/assets/favicon.ico");
-const MAIN_CSS: Asset = asset!("/assets/main.css");
-const HEADER_SVG: Asset = asset!("/assets/header.svg");
-const FONT_AWESOME_CSS: Asset = asset!("/assets/font-awesome.min.css");
-const FONT_AWESOME_WOFF2: Asset = asset!("/assets/fonts/fontawesome-webfont.woff2");
-const FONT_AWESOME_TTF: Asset = asset!("/assets/fonts/fontawesome-webfont.ttf");
+// const FAVICON: Asset = asset!("/assets/favicon.ico");
+const BOOTSTRAP_CSS: Asset = asset!("/assets/css/bootstrap.min.css");
+const MAIN_CSS: Asset = asset!("/assets/css/main.css");
 
 fn main() {
     dioxus::launch(App);
@@ -24,21 +23,53 @@ Github icon
 #[component]
 fn App() -> Element {
     rsx! {
-        document::Link { rel: "icon", href: FAVICON }
+        // document::Link { rel: "icon", href: FAVICON }
+        document::Link { rel: "stylesheet", href: BOOTSTRAP_CSS }
         document::Link { rel: "stylesheet", href: MAIN_CSS }
-        document::Link { rel: "stylesheet", href: FONT_AWESOME_CSS }
-        h1 {
-            id: "title",
-            "How do I write this symbol in Lean?"
-        }
-        Symbols {}
-        a {
-            href: "https://github.com/jprider63/lean4-symbols",
-            span {
-                class: "fa fa-fw fa-2x fa-github-square"
+        div {
+            class: "d-flex flex-column",
+            style: "min-height: 100dvh;",
+            main {
+                class: "flex-shrink-0",
+                div {
+                    class: "container",
+                    div {
+                        class: "row",
+                        div {
+                            class: "col-md-12",
+                            h1 {
+                                // id: "title",
+                                class: "display-1 text-center py-5",
+                                "How do I write this symbol in Lean?"
+                            }
+                        }
+                    }
+                    Symbols {}
+                }
+            }
+            footer {
+                class: "footer mt-auto py-3",
+                div {
+                    class: "container",
+                    div {
+                        class: "row",
+                        div {
+                            class: "col-md-12 text-center",
+                            a {
+                                href: "https://github.com/jprider63/lean4-symbols",
+                                Icon {
+                                    class: "footer-icon",
+                                    width: 48,
+                                    height: 48,
+                                    fill: "#212529",
+                                    icon: FaGithub,
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
-
     }
 }
 
@@ -79,7 +110,7 @@ pub fn Symbols() -> Element {
         let symbol_mapping = symbol_mapping.clone(); // TODO: get rid of this clone.
         move |e: Event<FormData>| {
             tracing::debug!("{e:?}");
-            let mut v = normalize_abbreviation(e.value());
+            let v = normalize_abbreviation(e.value());
 
             if let Some(symb) = symbol_mapping.clone().get_by_left(&v) {
                 tracing::debug!("Some: {symb:?}");
@@ -108,34 +139,55 @@ pub fn Symbols() -> Element {
 
     rsx! {
         div {
-            id: "symbols",
+            class: "row",
             div {
-                "Symbol"
+                class: "col-md-4 offset-md-1 py-5 text-center",
+                label {
+                    for: "form-input-symbol",
+                    class: "form-label h5",
+                    "Symbol"
+                }
                 input {
-                    class: format_args!("appearance-none border rounded py-1 px-2 {}", if left_error() {"border-red-500"} else {""}),
+                    type: "text",
+                    id: "form-input-symbol",
+                    class: format_args!("form-control {}", if left_error() {"is-invalid"} else {""}),
+                    "aria-describedby": "form-input-symbol-feedback",
                     placeholder: if both_empty() {"→"} else {""},
                     oninput: move |evt| handle_symbol(evt),
                     // onkeyup: move |evt| handle_symbol(evt),
                     value: "{symbol}"
                 }
                 if left_error() {
-                    span {
+                    div {
+                        id: "form-input-symbol-feedback",
+                        class: "invalid-feedback",
+                        style: "text-align: left;",
                         "Unknown symbol"
                     }
                 }
             }
             div {
-                "Abbreviation"
+                class: "col-md-4 offset-md-2 py-5 text-center",
+                label {
+                    for: "form-abbreviation-symbol",
+                    class: "form-label h5",
+                    "Abbreviation"
+                }
                 input {
-                    class: format_args!("appearance-none border rounded py-1 px-2 {}", if left_error() {"border-red-500"} else {""}),
+                    type: "text",
+                    class: format_args!("form-control py-1 px-2 {}", if right_error() {"is-invalid"} else {""}),
+                "aria-describedby": "form-abbreviation-symbol-feedback",
                     placeholder: if both_empty() {"\\r"} else {""},
                     oninput: move |evt| handle_abbreviation(evt),
                     // onkeyup: move |evt| handle_abbreviation(evt),
                     value: "{abbreviation}"
                 }
                 if right_error() {
-                    span {
-                        "Unknown symbol"
+                    div {
+                        id: "form-input-abbreviation-feedback",
+                        class: "invalid-feedback",
+                        style: "text-align: left;",
+                        "Unknown abbreviation"
                     }
                 }
             }
@@ -143,21 +195,3 @@ pub fn Symbols() -> Element {
     }
 }
 
-
-#[component]
-pub fn Hero() -> Element {
-    rsx! {
-        div {
-            id: "hero",
-            img { src: HEADER_SVG, id: "header" }
-            div { id: "links",
-                a { href: "https://dioxuslabs.com/learn/0.6/", "📚 Learn Dioxus" }
-                a { href: "https://dioxuslabs.com/awesome", "🚀 Awesome Dioxus" }
-                a { href: "https://github.com/dioxus-community/", "📡 Community Libraries" }
-                a { href: "https://github.com/DioxusLabs/sdk", "⚙️ Dioxus Development Kit" }
-                a { href: "https://marketplace.visualstudio.com/items?itemName=DioxusLabs.dioxus", "💫 VSCode Extension" }
-                a { href: "https://discord.gg/XgGxMSkvUM", "👋 Community Discord" }
-            }
-        }
-    }
-}

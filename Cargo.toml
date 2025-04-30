@@ -9,6 +9,7 @@ edition = "2021"
 [dependencies]
 bimap = "*"
 dioxus = { version = "0.6.0", features = [] }
+dioxus-free-icons = { version = "0.9", features = ["font-awesome-brands"] }
 tracing = "*"
 
 [features]
