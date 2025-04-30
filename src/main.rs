@@ -48,7 +48,7 @@ fn App() -> Element {
                 }
             }
             footer {
-                class: "footer mt-auto py-3",
+                class: "footer mt-auto py-5",
                 div {
                     class: "container",
                     div {
@@ -141,16 +141,16 @@ pub fn Symbols() -> Element {
         div {
             class: "row",
             div {
-                class: "col-md-4 offset-md-1 py-5 text-center",
+                class: "col-md-4 offset-md-1 py-3 text-center",
                 label {
                     for: "form-input-symbol",
-                    class: "form-label h5",
+                    class: "form-label h3",
                     "Symbol"
                 }
                 input {
                     type: "text",
                     id: "form-input-symbol",
-                    class: format_args!("form-control {}", if left_error() {"is-invalid"} else {""}),
+                    class: format_args!("form-control form-control-lg {}", if left_error() {"is-invalid"} else {""}),
                     "aria-describedby": "form-input-symbol-feedback",
                     placeholder: if both_empty() {"→"} else {""},
                     oninput: move |evt| handle_symbol(evt),
@@ -167,15 +167,15 @@ pub fn Symbols() -> Element {
                 }
             }
             div {
-                class: "col-md-4 offset-md-2 py-5 text-center",
+                class: "col-md-4 offset-md-2 py-3 text-center",
                 label {
                     for: "form-abbreviation-symbol",
-                    class: "form-label h5",
+                    class: "form-label h3",
                     "Abbreviation"
                 }
                 input {
                     type: "text",
-                    class: format_args!("form-control py-1 px-2 {}", if right_error() {"is-invalid"} else {""}),
+                    class: format_args!("form-control form-control-lg {}", if right_error() {"is-invalid"} else {""}),
                 "aria-describedby": "form-abbreviation-symbol-feedback",
                     placeholder: if both_empty() {"\\r"} else {""},
                     oninput: move |evt| handle_abbreviation(evt),
