@@ -74,7 +74,7 @@ pub fn Symbols() -> Element {
             s.remove(0);
         }
         s
-    }
+    };
     let mut handle_abbreviation = {
         let symbol_mapping = symbol_mapping.clone(); // TODO: get rid of this clone.
         move |e: Event<FormData>| {
