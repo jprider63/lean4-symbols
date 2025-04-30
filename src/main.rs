@@ -3,7 +3,7 @@ use dioxus_free_icons::icons::fa_brands_icons::*;
 use dioxus_free_icons::Icon;
 use std::sync::LazyLock;
 use std::collections::BTreeMap;
-use tracing;
+// use tracing;
 
 // const FAVICON: Asset = asset!("/assets/favicon.ico");
 const BOOTSTRAP_CSS: Asset = asset!("/assets/css/bootstrap.min.css");

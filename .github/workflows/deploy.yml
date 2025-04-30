@@ -25,12 +25,39 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v4
 
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
-
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
+      - name: Install Rust and Dioxus
         run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+          rustup update stable && rustup default stable
+          cargo install cargo-binstall
+          cargo binstall dioxus-cli
+
+      - name: Build Lean Symbols
+        run: dx build
+
+      - name: Upload artifact
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v1
+        with:
+          # location of the coverage artifacts
+          path: "./target/dx/lean4_symbols/debug/web/public"
+
+    deploy:
+      # Add a dependency to the build job
+      needs: build
+
+      # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
+      permissions:
+        pages: write      # to deploy to Pages
+        id-token: write   # to verify the deployment originates from an appropriate source
+
+      # Deploy to the github-pages environment
+      environment:
+        name: github-pages
+        url: ${{ steps.deployment.outputs.page_url }}
+
+      # Specify runner + deployment step
+      runs-on: ubuntu-latest
+      steps:
+        - name: Deploy to GitHub Pages
+          id: deployment
+          uses: actions/deploy-pages@v4
