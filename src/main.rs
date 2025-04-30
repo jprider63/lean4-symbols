@@ -17,13 +17,21 @@ static MAPPING : LazyLock<(BTreeMap<String,String>, BTreeMap<String,String>)> = 
     let mut symbol_mapping = BTreeMap::<String, String>::new();
     let mut abbreviation_mapping = BTreeMap::<String, String>::new();
     for (abbr, symb) in m {
-        // tracing::debug!("{abbr}, {symb}");
-        let symb = symb.as_str().expect("Invalid JSON. Expected a string.");
-        let _ = symbol_mapping.insert(symb.into(), abbr.clone());
-        let _ = abbreviation_mapping.insert(abbr.clone(), symb.into());
+        let symb = symb.as_str().expect("Invalid JSON. Expected a string.").to_string();
+        // Prioritize shorter abbreviations
+        let should_insert = {
+            if let Some(old_abbr) = symbol_mapping.get(&symb) {
+                abbr.len() < old_abbr.len()
+            } else {
+                true
+            }
+        };
+        if should_insert {
+            let _ = symbol_mapping.insert(symb.clone(), abbr.clone());
+        }
+        let _ = abbreviation_mapping.insert(abbr.clone(), symb);
     }
-    // tracing::debug!("{symbol_mapping:?}");
-    tracing::debug!("{abbreviation_mapping:?}");
+    // tracing::debug!("{abbreviation_mapping:?}");
     (symbol_mapping, abbreviation_mapping)
 });
 
@@ -99,15 +107,15 @@ pub fn Symbols() -> Element {
     let mut last_edit = use_signal(|| true); // true is symbol, false is abbreviation
 
     let mut handle_symbol = move |e: Event<FormData>| {
-        tracing::debug!("{e:?}");
+        // tracing::debug!("{e:?}");
         let v = e.value();
         if let Some(abbr) = (*MAPPING).0.get(&v) {
             let mut r = "\\".to_string();
             r.push_str(abbr);
-            tracing::debug!("Some: {abbr:?}");
+            // tracing::debug!("Some: {abbr:?}");
             abbreviation.set(r);
         } else {
-            tracing::debug!("None");
+            // tracing::debug!("None");
             abbreviation.set("".to_string());
         }
         symbol.set(v);
@@ -120,14 +128,14 @@ pub fn Symbols() -> Element {
         s
     };
     let mut handle_abbreviation = move |e: Event<FormData>| {
-        tracing::debug!("{e:?}");
+        // tracing::debug!("{e:?}");
         let v = normalize_abbreviation(e.value());
 
         if let Some(symb) = (*MAPPING).1.get(&v) {
-            tracing::debug!("Some: {symb:?}");
+            // tracing::debug!("Some: {symb:?}");
             symbol.set(symb.clone());
         } else {
-            tracing::debug!("None");
+            // tracing::debug!("None");
             symbol.set("".to_string());
         }
         abbreviation.set(e.value());
