@@ -1,27 +1,30 @@
-use bimap::BiMap;
 use dioxus::prelude::*;
 use dioxus_free_icons::icons::fa_brands_icons::*;
 use dioxus_free_icons::Icon;
 use std::sync::LazyLock;
+use std::collections::BTreeMap;
 use tracing;
 
 // const FAVICON: Asset = asset!("/assets/favicon.ico");
 const BOOTSTRAP_CSS: Asset = asset!("/assets/css/bootstrap.min.css");
 const MAIN_CSS: Asset = asset!("/assets/css/main.css");
 
-static SYMBOL_MAPPING : LazyLock<BiMap<String,String>> = LazyLock::new(|| {
+static MAPPING : LazyLock<(BTreeMap<String,String>, BTreeMap<String,String>)> = LazyLock::new(|| {
     let abbreviations = include_bytes!("../vscode-lean4/lean4-unicode-input/src/abbreviations.json");
     let abbreviations: serde_json::Value = serde_json::from_slice(abbreviations).expect("JSON was not well-formatted");
     let m = abbreviations.as_object().expect("Invalid JSON. Expected a dictionary.");
 
-    let mut symbol_mapping = BiMap::<String, String>::new();
+    let mut symbol_mapping = BTreeMap::<String, String>::new();
+    let mut abbreviation_mapping = BTreeMap::<String, String>::new();
     for (abbr, symb) in m {
         // tracing::debug!("{abbr}, {symb}");
         let symb = symb.as_str().expect("Invalid JSON. Expected a string.");
-        symbol_mapping.insert(abbr.clone(), symb.into());
+        let _ = symbol_mapping.insert(symb.into(), abbr.clone());
+        let _ = abbreviation_mapping.insert(abbr.clone(), symb.into());
     }
-    tracing::debug!("{symbol_mapping:?}");
-    symbol_mapping
+    // tracing::debug!("{symbol_mapping:?}");
+    tracing::debug!("{abbreviation_mapping:?}");
+    (symbol_mapping, abbreviation_mapping)
 });
 
 fn main() {
@@ -98,7 +101,7 @@ pub fn Symbols() -> Element {
     let mut handle_symbol = move |e: Event<FormData>| {
         tracing::debug!("{e:?}");
         let v = e.value();
-        if let Some(abbr) = (*SYMBOL_MAPPING).get_by_right(&v) {
+        if let Some(abbr) = (*MAPPING).0.get(&v) {
             let mut r = "\\".to_string();
             r.push_str(abbr);
             tracing::debug!("Some: {abbr:?}");
@@ -120,7 +123,7 @@ pub fn Symbols() -> Element {
         tracing::debug!("{e:?}");
         let v = normalize_abbreviation(e.value());
 
-        if let Some(symb) = (*SYMBOL_MAPPING).get_by_left(&v) {
+        if let Some(symb) = (*MAPPING).1.get(&v) {
             tracing::debug!("Some: {symb:?}");
             symbol.set(symb.clone());
         } else {
@@ -136,10 +139,10 @@ pub fn Symbols() -> Element {
     let both_empty = use_memo(move || symbol() == "" && abbreviation() == "");
 
     let left_error = {
-        use_memo(move || last_edit() && symbol() != "" && (*SYMBOL_MAPPING).get_by_right(&symbol()).is_none())
+        use_memo(move || last_edit() && symbol() != "" && (*MAPPING).0.get(&symbol()).is_none())
     };
     let right_error = {
-        use_memo(move || !last_edit() && abbreviation() != "" && (*SYMBOL_MAPPING).get_by_left(&normalize_abbreviation(abbreviation())).is_none())
+        use_memo(move || !last_edit() && abbreviation() != "" && (*MAPPING).1.get(&normalize_abbreviation(abbreviation())).is_none())
     };
 
     rsx! {
