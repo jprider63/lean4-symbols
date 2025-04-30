@@ -1,0 +1,3 @@
+[submodule "vscode-lean4"]
+	path = vscode-lean4
+	url = https://github.com/leanprover/vscode-lean4.git
