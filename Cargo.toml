@@ -9,6 +9,7 @@ edition = "2021"
 [dependencies]
 dioxus = { version = "0.6.0", features = [] }
 dioxus-free-icons = { version = "0.9", features = ["font-awesome-brands", "bootstrap"] }
+dioxus-clipboard = { git="https://github.com/cpt-n3mo/dioxus-clipboard.git", rev="b16c5597f21345a041f1809768a63f13e0fae23a"}
 serde_json = "*"
 tracing = "*"
 

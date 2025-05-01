@@ -1,10 +1,11 @@
 use dioxus::prelude::*;
+use dioxus_clipboard::prelude::use_clipboard;
 use dioxus_free_icons::icons::bs_icons::*;
 use dioxus_free_icons::icons::fa_brands_icons::*;
 use dioxus_free_icons::Icon;
 use std::sync::LazyLock;
 use std::collections::BTreeMap;
-// use tracing;
+use tracing;
 
 // const FAVICON: Asset = asset!("/assets/favicon.ico");
 const BOOTSTRAP_CSS: Asset = asset!("/assets/css/bootstrap.min.css");
@@ -106,6 +107,7 @@ pub fn Symbols() -> Element {
     let mut symbol = use_signal(|| "".to_string());
     let mut abbreviation: Signal<String> = use_signal(|| "".to_string());
     let mut last_edit = use_signal(|| true); // true is symbol, false is abbreviation
+    let mut clipboard = use_clipboard();
 
     let mut handle_symbol = move |e: Event<FormData>| {
         // tracing::debug!("{e:?}");
@@ -191,7 +193,7 @@ pub fn Symbols() -> Element {
                     "Abbreviation"
                 }
                 div {
-                    class: "input-group has-validation",
+                    class: format_args!("input-group {}", if right_error() {"has-validation"} else {""}),
                     input {
                         type: "text",
                         class: format_args!("form-control form-control-lg {}", if right_error() {"is-invalid"} else {""}),
@@ -202,22 +204,28 @@ pub fn Symbols() -> Element {
                         value: "{abbreviation}"
                     }
                     button {
-                        class: "btn btn-secondary",
+                        class: "btn btn-outline-secondary",
+                        onclick: move |_| {
+                            tracing::info!("HERE!");
+                            if let Err(_) = clipboard.set(abbreviation()) {
+                                tracing::info!("Failed to set clipboard");
+                            }
+                        },
                         Icon {
-                            class: "footer-icon",
+                            class: "copy-icon",
                             width: 24,
                             height: 24,
                             fill: "#212529",
                             icon: BsClipboard,
                         }
                     }
-                }
-                if right_error() {
-                    div {
-                        id: "form-input-abbreviation-feedback",
-                        class: "invalid-feedback",
-                        style: "text-align: left;",
-                        "Unknown abbreviation"
+                    if right_error() {
+                        div {
+                            id: "form-input-abbreviation-feedback",
+                            class: "invalid-feedback",
+                            style: "text-align: left;",
+                            "Unknown abbreviation"
+                        }
                     }
                 }
             }

@@ -25,3 +25,7 @@ input {
 	fill: #777;
 }
 
+button:hover .copy-icon {
+	fill: white;
+}
+
