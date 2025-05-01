@@ -1,4 +1,5 @@
 use dioxus::prelude::*;
+use dioxus_free_icons::icons::bs_icons::*;
 use dioxus_free_icons::icons::fa_brands_icons::*;
 use dioxus_free_icons::Icon;
 use std::sync::LazyLock;
@@ -189,14 +190,27 @@ pub fn Symbols() -> Element {
                     class: "form-label h3",
                     "Abbreviation"
                 }
-                input {
-                    type: "text",
-                    class: format_args!("form-control form-control-lg {}", if right_error() {"is-invalid"} else {""}),
-                "aria-describedby": "form-abbreviation-symbol-feedback",
-                    placeholder: if both_empty() {"\\r"} else {""},
-                    oninput: move |evt| handle_abbreviation(evt),
-                    // onkeyup: move |evt| handle_abbreviation(evt),
-                    value: "{abbreviation}"
+                div {
+                    class: "input-group has-validation",
+                    input {
+                        type: "text",
+                        class: format_args!("form-control form-control-lg {}", if right_error() {"is-invalid"} else {""}),
+                    "aria-describedby": "form-abbreviation-symbol-feedback",
+                        placeholder: if both_empty() {"\\r"} else {""},
+                        oninput: move |evt| handle_abbreviation(evt),
+                        // onkeyup: move |evt| handle_abbreviation(evt),
+                        value: "{abbreviation}"
+                    }
+                    button {
+                        class: "btn btn-secondary",
+                        Icon {
+                            class: "footer-icon",
+                            width: 24,
+                            height: 24,
+                            fill: "#212529",
+                            icon: BsClipboard,
+                        }
+                    }
                 }
                 if right_error() {
                     div {
