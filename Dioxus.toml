@@ -4,6 +4,7 @@
 
 # HTML title tag content
 title = "Lean4 Symbols"
+base_path = "lean4-symbols"
 
 # include `assets` in web platform
 [web.resource]
